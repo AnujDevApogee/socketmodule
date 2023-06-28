@@ -7,7 +7,7 @@ import kotlin.coroutines.CoroutineContext
 class SocketBuilder {
 
     private var ipAddress: String? = null
-    private var port: String? = null
+    private var port: Int? = null
     private var listener: SocketListener? = null
 
     fun newBuilder(): SocketBuilder {
@@ -21,7 +21,7 @@ class SocketBuilder {
         return this
     }
 
-    fun addPort(port: String): SocketBuilder {
+    fun addPort(port: Int): SocketBuilder {
         this.port = port
         return this
     }
@@ -33,7 +33,7 @@ class SocketBuilder {
     }
 
     fun build(coroutineContext: CoroutineContext): SocketClient {
-        if (UtilsFiles.checkValue(port)) {
+        if (UtilsFiles.checkValue(port?.toString())) {
             throw IllegalAccessException("Invalid Port")
         }
         if (UtilsFiles.checkValue(ipAddress)) {

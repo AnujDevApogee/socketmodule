@@ -1,12 +1,14 @@
 package com.apogee.socketlib.listner
 
+import java.io.IOException
+
 sealed class ConnectionResponse {
 
     class OnConnected(val response: String) : ConnectionResponse()
 
     class OnDisconnect(val code: Int, val reason: String) : ConnectionResponse()
 
-    class OnResponseError(val throwable: Throwable) : ConnectionResponse()
+    class OnResponseError(val exception: IOException) : ConnectionResponse()
 
     class OnResponse(val response: String) : ConnectionResponse()
 

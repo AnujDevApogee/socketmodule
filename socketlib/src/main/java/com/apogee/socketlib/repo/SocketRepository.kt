@@ -1,47 +1,85 @@
 package com.apogee.socketlib.repo
 
+import com.apogee.socketlib.listner.ConnectionResponse
 import com.apogee.socketlib.utils.UtilsFiles
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.isActive
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
 import java.io.PrintWriter
 import java.net.Socket
 
 
-class SocketRepository {
+class SocketRepository(
+    private val ip: String, private val port: Int
+) {
 
     private var output: PrintWriter? = null
     private var input: BufferedReader? = null
-    var socket: Socket? = null
+    private var socket: Socket? = null
 
-    fun createConnection() = flow {
+    fun listenForIncomingResponse() = flow {
         while (currentCoroutineContext().isActive) {
-            //doConnection()
-            emit("true ${Math.random()}")
-            kotlinx.coroutines.delay(100)
+            try {
+                val message = input!!.readLine()
+                UtilsFiles.createLogCat("testing_conn","testing... $message")
+                if (message != null) {
+                    emit(ConnectionResponse.OnResponse(message))
+                }
+            } catch (e: IOException) {
+                emit(ConnectionResponse.OnResponseError(e))
+            }
+            delay(100)
         }
     }.flowOn(Dispatchers.IO)
 
-    private suspend fun doConnection()= withContext(Dispatchers.IO) {
-        while (isActive){
-            UtilsFiles.createLogCat("TESTING_CONNECTION", "TestingConnection")
+
+    suspend fun writeConnection(requestBody: String) = withContext(Dispatchers.IO) {
+        if (isActive) {
+            try {
+                output?.write(requestBody)
+                output?.flush()
+                null
+            } catch (e: Exception) {
+                ConnectionResponse.OnRequestError("${e.message}")
+            }
+        } else {
+            null
         }
     }
 
 
-    fun disconnect(job:Job){
-        job.cancel("testing completed")
+    suspend fun establishConnection() = withContext(Dispatchers.IO) {
+        return@withContext if (isActive) {
+            try {
+                socket = Socket(ip, port)
+                output = PrintWriter(socket?.getOutputStream()!!)
+                input = BufferedReader(InputStreamReader(socket?.getInputStream()))
+                ConnectionResponse.OnConnected("Connected")
+            } catch (e: IOException) {
+                ConnectionResponse.OnResponseError(e)
+            }
+        } else {
+            null
+        }
     }
 
 
+    fun disconnect(job: Job): ConnectionResponse.OnDisconnect {
+        socket?.close()
+        output?.close()
+        input?.close()
+        job.cancel("testing completed")
+        return ConnectionResponse.OnDisconnect(400,"Disconnected Manually")
+    }
 
 
 }

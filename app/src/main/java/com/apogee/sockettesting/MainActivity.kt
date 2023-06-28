@@ -34,9 +34,36 @@ class MainActivity : AppCompatActivity() {
     private val callback = object : SocketListener {
 
         override fun socketListener(conn: ConnectionResponse) {
-            if (conn is ConnectionResponse.OnConnected){
-                binding.tvMessages.append(conn.response)
-                binding.tvMessages.append("\n")
+            when (conn) {
+                is ConnectionResponse.OnConnected -> {
+                    binding.tvMessages.append(conn.response)
+                    binding.tvMessages.append("\n")
+                }
+
+                is ConnectionResponse.OnDisconnect -> {
+                    binding.tvMessages.append(conn.reason)
+                    binding.tvMessages.append("\n")
+                }
+
+                is ConnectionResponse.OnNetworkConnection -> {
+                    binding.tvMessages.append(conn.response)
+                    binding.tvMessages.append("\n")
+                }
+
+                is ConnectionResponse.OnRequestError -> {
+                    binding.tvMessages.append(conn.errorCause)
+                    binding.tvMessages.append("\n")
+                }
+
+                is ConnectionResponse.OnResponse -> {
+                    binding.tvMessages.append(conn.response)
+                    binding.tvMessages.append("\n")
+                }
+
+                is ConnectionResponse.OnResponseError -> {
+                    binding.tvMessages.append("${conn.exception.message}")
+                    binding.tvMessages.append("\n")
+                }
             }
         }
 
@@ -53,18 +80,23 @@ class MainActivity : AppCompatActivity() {
             .newBuilder()
             .addCallBack(listener = callback)
             .addIpAddress(SERVER_IP)
-            .addPort("$SERVER_PORT")
+            .addPort(SERVER_PORT)
             .build(lifecycleScope.coroutineContext)
 
 
         binding.btnConnect.setOnClickListener {
-            client.establishesConnection()
+            client.establishesConnection(this)
 //            binding.tvMessages.text = ""
 //            val tread = Thread(Thread1())
 //            tread.start()
         }
-        binding.btnSend.setOnClickListener {
+
+        binding.btnDissonnect.setOnClickListener {
             client.disconnect()
+        }
+
+        binding.btnSend.setOnClickListener {
+            client.onRequestSent(sampleUrl)
 //            val message: String = sampleUrl
 //            if (message.isNotEmpty()) {
 //                Thread(Thread3(message)).start()
