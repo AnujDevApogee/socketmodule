@@ -1,6 +1,7 @@
 package com.apogee.sockettesting
 
 import android.os.Bundle
+import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -31,8 +32,12 @@ class MainActivity : AppCompatActivity() {
             "Authorization: Basic Um92ZXJOb2lkYTpxd2VydHk=\r\n\r\n\r\n\r\n"
 
     private val callback = object : SocketListener {
-        override fun webSocketListener(conn: ConnectionResponse) {
 
+        override fun socketListener(conn: ConnectionResponse) {
+            if (conn is ConnectionResponse.OnConnected){
+                binding.tvMessages.append(conn.response)
+                binding.tvMessages.append("\n")
+            }
         }
 
     }
@@ -42,6 +47,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.tvMessages.movementMethod = ScrollingMovementMethod()
 
         val client = SocketBuilder()
             .newBuilder()

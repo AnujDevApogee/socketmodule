@@ -4,9 +4,11 @@ import com.apogee.socketlib.utils.UtilsFiles
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.isActive
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
@@ -21,9 +23,10 @@ class SocketRepository {
     var socket: Socket? = null
 
     fun createConnection() = flow {
-        while (true) {
-            doConnection()
-            emit(true)
+        while (currentCoroutineContext().isActive) {
+            //doConnection()
+            emit("true ${Math.random()}")
+            kotlinx.coroutines.delay(100)
         }
     }.flowOn(Dispatchers.IO)
 
