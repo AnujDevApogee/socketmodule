@@ -3,6 +3,10 @@ package com.apogee.sockettesting
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.apogee.socketlib.SocketBuilder
+import com.apogee.socketlib.listner.ConnectionResponse
+import com.apogee.socketlib.listner.SocketListener
 import com.apogee.sockettesting.databinding.ActivityMainBinding
 import java.io.BufferedReader
 import java.io.IOException
@@ -19,12 +23,19 @@ class MainActivity : AppCompatActivity() {
         const val SERVER_PORT = 8125
         private var output: PrintWriter? = null
         private var input: BufferedReader? = null
-        var socket: Socket?=null
+        var socket: Socket? = null
     }
 
     private var sampleUrl = "\r\n\r\nGET /NOIDA2_A HTTP/1.0\n" +
-    "User-Agent: NTRIP ApogeeGnss\n" +
-    "Authorization: Basic Um92ZXJOb2lkYTpxd2VydHk=\r\n\r\n\r\n\r\n"
+            "User-Agent: NTRIP ApogeeGnss\n" +
+            "Authorization: Basic Um92ZXJOb2lkYTpxd2VydHk=\r\n\r\n\r\n\r\n"
+
+    private val callback = object : SocketListener {
+        override fun webSocketListener(conn: ConnectionResponse) {
+
+        }
+
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,16 +43,26 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val client = SocketBuilder()
+            .newBuilder()
+            .addCallBack(listener = callback)
+            .addIpAddress(SERVER_IP)
+            .addPort("$SERVER_PORT")
+            .build(lifecycleScope.coroutineContext)
+
+
         binding.btnConnect.setOnClickListener {
-            binding.tvMessages.text = ""
-            val tread = Thread(Thread1())
-            tread.start()
+            client.establishesConnection()
+//            binding.tvMessages.text = ""
+//            val tread = Thread(Thread1())
+//            tread.start()
         }
         binding.btnSend.setOnClickListener {
-            val message: String = sampleUrl
-            if (message.isNotEmpty()) {
-                Thread(Thread3(message)).start()
-            }
+            client.disconnect()
+//            val message: String = sampleUrl
+//            if (message.isNotEmpty()) {
+//                Thread(Thread3(message)).start()
+//            }
         }
     }
 
@@ -66,10 +87,10 @@ class MainActivity : AppCompatActivity() {
             while (true) {
                 try {
                     val message = input!!.readLine()
-                    if (message!= null) {
+                    if (message != null) {
                         Log.i("Thread_Conn", "run: from Server $message")
-                    }else{
-                       val thread1 = Thread(Thread1())
+                    } else {
+                        val thread1 = Thread(Thread1())
                         thread1.start()
                         return
                     }
@@ -82,15 +103,13 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
-    inner class Thread3(private val message:String) : Runnable {
+    inner class Thread3(private val message: String) : Runnable {
         override fun run() {
             output?.write(message)
             output?.flush()
             Log.i("Thread_Conn", "run: Send $message")
         }
     }
-
 
 
 }
