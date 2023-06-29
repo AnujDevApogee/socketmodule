@@ -1,6 +1,7 @@
 package com.apogee.socketlib.listner
 
 import java.io.IOException
+import java.io.InputStream
 
 sealed class ConnectionResponse {
     /**
@@ -25,7 +26,7 @@ sealed class ConnectionResponse {
      * OnResponse() return the response string
      * Use : response attribute to access the socket response
      */
-    class OnResponse(val response: String) : ConnectionResponse()
+    class OnResponse(val response: InputStream) : ConnectionResponse()
 
     /**
      * OnNetworkConnection() return the response and connection type

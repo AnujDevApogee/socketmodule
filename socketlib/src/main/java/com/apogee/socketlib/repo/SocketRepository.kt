@@ -30,9 +30,10 @@ class SocketRepository(
         while (currentCoroutineContext().isActive) {
             try {
                 val message = input?.readLine()
+                val socket=socket?.getInputStream()
                // UtilsFiles.createLogCat("testing_conn","testing... $message")
-                if (message != null) {
-                    emit(ConnectionResponse.OnResponse(message))
+                if (message != null && socket!=null) {
+                    emit(ConnectionResponse.OnResponse(socket))
                 }
             } catch (e: IOException) {
                // UtilsFiles.createLogCat("testing_conn", "Reading Eeception${e.message}")
