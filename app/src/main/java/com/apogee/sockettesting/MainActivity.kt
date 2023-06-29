@@ -5,6 +5,7 @@ import android.text.method.ScrollingMovementMethod
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.apogee.socketlib.SocketBuilder
+import com.apogee.socketlib.SocketClient
 import com.apogee.socketlib.listner.ConnectionResponse
 import com.apogee.socketlib.listner.SocketListener
 import com.apogee.sockettesting.databinding.ActivityMainBinding
@@ -12,6 +13,7 @@ import com.apogee.sockettesting.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+    private lateinit var socketClient: SocketClient
 
     companion object {
         const val SERVER_IP = "120.138.10.146"
@@ -27,33 +29,27 @@ class MainActivity : AppCompatActivity() {
         override fun socketListener(conn: ConnectionResponse) {
             when (conn) {
                 is ConnectionResponse.OnConnected -> {
-                    binding.tvMessages.append(conn.response)
-                    binding.tvMessages.append("\n")
+
                 }
 
                 is ConnectionResponse.OnDisconnect -> {
-                    binding.tvMessages.append(conn.reason)
-                    binding.tvMessages.append("\n")
+
                 }
 
                 is ConnectionResponse.OnNetworkConnection -> {
-                    binding.tvMessages.append(conn.response)
-                    binding.tvMessages.append("\n")
+
                 }
 
                 is ConnectionResponse.OnRequestError -> {
-                    binding.tvMessages.append(conn.errorCause)
-                    binding.tvMessages.append("\n")
+
                 }
 
                 is ConnectionResponse.OnResponse -> {
-                    binding.tvMessages.append(conn.response)
-                    binding.tvMessages.append("\n")
+
                 }
 
                 is ConnectionResponse.OnResponseError -> {
-                    binding.tvMessages.append("${conn.exception.message}")
-                    binding.tvMessages.append("\n")
+
                 }
             }
         }
@@ -67,7 +63,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         binding.tvMessages.movementMethod = ScrollingMovementMethod()
 
-        val client = SocketBuilder()
+        socketClient = SocketBuilder()
             .newBuilder(lifecycleScope.coroutineContext)
             .addCallBack(listener = callback)
             .addIpAddress(SERVER_IP)
@@ -76,15 +72,15 @@ class MainActivity : AppCompatActivity() {
 
 
         binding.btnConnect.setOnClickListener {
-            client.establishesConnection(this)
+            socketClient.establishConnection(this)
         }
 
         binding.btnDissonnect.setOnClickListener {
-            client.disconnect()
+            socketClient.disconnect()
         }
 
         binding.btnSend.setOnClickListener {
-            client.onRequestSent(sampleUrl)
+            socketClient.onRequestSent(sampleUrl)
         }
     }
 

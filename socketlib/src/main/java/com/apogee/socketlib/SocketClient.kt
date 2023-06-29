@@ -33,7 +33,7 @@ class SocketClient(
     /**
      * Establishes Connection with provided ip Address and Port
      */
-    fun establishesConnection(context: Context) {
+    fun establishConnection(context: Context) {
         if (!context.isNetworkAvailable()) {
             _state.value = ConnectionResponse.OnNetworkConnection(
                 "No Internet Connection",
