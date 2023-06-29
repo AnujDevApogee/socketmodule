@@ -29,27 +29,33 @@ class MainActivity : AppCompatActivity() {
         override fun socketListener(conn: ConnectionResponse) {
             when (conn) {
                 is ConnectionResponse.OnConnected -> {
-
+                    binding.tvMessages.append(conn.response)
+                    binding.tvMessages.append("\n")
                 }
 
                 is ConnectionResponse.OnDisconnect -> {
-
+                    binding.tvMessages.append(conn.reason)
+                    binding.tvMessages.append("\n")
                 }
 
                 is ConnectionResponse.OnNetworkConnection -> {
-
+                    binding.tvMessages.append(conn.response)
+                    binding.tvMessages.append("\n")
                 }
 
                 is ConnectionResponse.OnRequestError -> {
-
+                    binding.tvMessages.append(conn.errorCause)
+                    binding.tvMessages.append("\n")
                 }
 
                 is ConnectionResponse.OnResponse -> {
-
+                    binding.tvMessages.append(conn.response.toString())
+                    binding.tvMessages.append("\n")
                 }
 
                 is ConnectionResponse.OnResponseError -> {
-
+                    binding.tvMessages.append(conn.exception.message)
+                    binding.tvMessages.append("\n")
                 }
             }
         }
