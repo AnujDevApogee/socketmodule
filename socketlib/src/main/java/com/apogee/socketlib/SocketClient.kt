@@ -30,6 +30,9 @@ class SocketClient(
     private val _state = MutableStateFlow<ConnectionResponse?>(null)
     private val state = _state
 
+    /**
+     * Establishes Connection with provided ip Address and Port
+     */
     fun establishesConnection(context: Context) {
         if (!context.isNetworkAvailable()) {
             _state.value = ConnectionResponse.OnNetworkConnection(
@@ -38,12 +41,13 @@ class SocketClient(
             )
             return
         }
+        disconnect()
         jobConnection = launch {
             val response = repo.establishConnection()
             if (response != null) {
                 _state.value = response
                 repo.listenForIncomingResponse().cancellable().onEach {
-                      _state.value = it
+                    _state.value = it
                 }.collect {
                     UtilsFiles.createLogCat("TESTING_COROUTINE", "It value testing ")
                 }
@@ -65,11 +69,20 @@ class SocketClient(
         }
     }
 
-
+    /**
+     * Purpose is to disconnect the Socket
+     */
     fun disconnect() {
-        _state.value = repo.disconnect(jobConnection!!)
+        if (jobConnection != null) {
+            _state.value = repo.disconnect(jobConnection!!)
+        }
     }
 
+    /**
+     * OnRequestSent()
+     * Required to a param String type
+     * Use to send to data to connected socket
+     */
 
     fun onRequestSent(string: String) {
         if (UtilsFiles.checkValue(string)) {

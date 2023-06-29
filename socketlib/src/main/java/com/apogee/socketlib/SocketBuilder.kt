@@ -9,10 +9,12 @@ class SocketBuilder {
     private var ipAddress: String? = null
     private var port: Int? = null
     private var listener: SocketListener? = null
+    private var coroutineContext: CoroutineContext? = null
 
-    fun newBuilder(): SocketBuilder {
+    fun newBuilder(context: CoroutineContext): SocketBuilder {
         this.port = null
         this.ipAddress = null
+        this.coroutineContext = context
         return this
     }
 
@@ -32,7 +34,7 @@ class SocketBuilder {
         return this
     }
 
-    fun build(coroutineContext: CoroutineContext): SocketClient {
+    fun build(): SocketClient {
         if (UtilsFiles.checkValue(port?.toString())) {
             throw IllegalAccessException("Invalid Port")
         }
@@ -44,8 +46,16 @@ class SocketBuilder {
             throw IllegalAccessException("Cannot find Callback")
         }
 
-        return SocketClient(ipAddress = ipAddress!!, port = port!!, listener = listener!!
-        , coroutineContext = coroutineContext)
+        if (coroutineContext==null){
+            throw  IllegalAccessException("Context not attacked")
+        }
+
+        return SocketClient(
+            ipAddress = ipAddress!!,
+            port = port!!,
+            listener = listener!!,
+            coroutineContext = coroutineContext!!
+        )
     }
 
 }
