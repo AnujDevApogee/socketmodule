@@ -16,6 +16,7 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.io.PrintWriter
 import java.net.Socket
+import java.util.concurrent.CancellationException
 
 
 class SocketRepository(
@@ -29,13 +30,15 @@ class SocketRepository(
     fun listenForIncomingResponse() = flow {
         while (currentCoroutineContext().isActive) {
             try {
-                val message = input!!.readLine()
+                val message = input?.readLine()
                 UtilsFiles.createLogCat("testing_conn","testing... $message")
                 if (message != null) {
                     emit(ConnectionResponse.OnResponse(message))
                 }
             } catch (e: IOException) {
+                UtilsFiles.createLogCat("testing_conn", "Reading Eeception${e.message}")
                 emit(ConnectionResponse.OnResponseError(e))
+                currentCoroutineContext().cancel(CancellationException())
             }
             delay(100)
         }
@@ -49,6 +52,7 @@ class SocketRepository(
                 output?.flush()
                 null
             } catch (e: Exception) {
+                UtilsFiles.createLogCat("testing_conn", "Write error ${e.message}")
                 ConnectionResponse.OnRequestError("${e.message}")
             }
         } else {

@@ -41,7 +41,6 @@ class SocketClient(
             )
             return
         }
-        disconnect()
         jobConnection = launch {
             val response = repo.establishConnection()
             if (response != null) {
