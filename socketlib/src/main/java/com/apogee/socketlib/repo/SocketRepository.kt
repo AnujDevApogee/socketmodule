@@ -1,7 +1,6 @@
 package com.apogee.socketlib.repo
 
 import com.apogee.socketlib.listner.ConnectionResponse
-import com.apogee.socketlib.utils.UtilsFiles
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -31,12 +30,12 @@ class SocketRepository(
         while (currentCoroutineContext().isActive) {
             try {
                 val message = input?.readLine()
-                UtilsFiles.createLogCat("testing_conn","testing... $message")
+               // UtilsFiles.createLogCat("testing_conn","testing... $message")
                 if (message != null) {
                     emit(ConnectionResponse.OnResponse(message))
                 }
             } catch (e: IOException) {
-                UtilsFiles.createLogCat("testing_conn", "Reading Eeception${e.message}")
+               // UtilsFiles.createLogCat("testing_conn", "Reading Eeception${e.message}")
                 emit(ConnectionResponse.OnResponseError(e))
                 currentCoroutineContext().cancel(CancellationException())
             }
@@ -52,7 +51,7 @@ class SocketRepository(
                 output?.flush()
                 null
             } catch (e: Exception) {
-                UtilsFiles.createLogCat("testing_conn", "Write error ${e.message}")
+               // UtilsFiles.createLogCat("testing_conn", "Write error ${e.message}")
                 ConnectionResponse.OnRequestError("${e.message}")
             }
         } else {

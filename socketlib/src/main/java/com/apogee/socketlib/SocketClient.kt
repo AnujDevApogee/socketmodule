@@ -48,7 +48,7 @@ class SocketClient(
                 repo.listenForIncomingResponse().cancellable().onEach {
                     _state.value = it
                 }.collect {
-                    UtilsFiles.createLogCat("TESTING_COROUTINE", "It value testing ")
+              //      UtilsFiles.createLogCat("TESTING_COROUTINE", "It value testing ")
                 }
             }
         }
