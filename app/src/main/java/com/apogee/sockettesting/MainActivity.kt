@@ -8,6 +8,7 @@ import com.apogee.socketlib.SocketBuilder
 import com.apogee.socketlib.SocketClient
 import com.apogee.socketlib.listner.ConnectionResponse
 import com.apogee.socketlib.listner.SocketListener
+import com.apogee.socketlib.utils.UtilsFiles
 import com.apogee.sockettesting.databinding.ActivityMainBinding
 
 
@@ -49,6 +50,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 is ConnectionResponse.OnResponse -> {
+                    UtilsFiles.createLogCat("TEST_Size","${conn.response.size}")
                     binding.tvMessages.append(conn.response.toString())
                     binding.tvMessages.append("\n")
                 }

@@ -26,7 +26,7 @@ sealed class ConnectionResponse {
      * OnResponse() return the response string
      * Use : response attribute to access the socket response
      */
-    class OnResponse(val response: InputStream) : ConnectionResponse()
+    class OnResponse(val response: ByteArray) : ConnectionResponse()
 
     /**
      * OnNetworkConnection() return the response and connection type

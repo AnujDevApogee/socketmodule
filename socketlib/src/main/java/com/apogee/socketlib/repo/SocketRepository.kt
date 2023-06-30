@@ -11,10 +11,12 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
+import java.io.DataInputStream
 import java.io.IOException
 import java.io.InputStreamReader
 import java.io.PrintWriter
 import java.net.Socket
+import java.util.Arrays
 import java.util.concurrent.CancellationException
 
 
@@ -23,24 +25,24 @@ class SocketRepository(
 ) {
 
     private var output: PrintWriter? = null
-    private var input: BufferedReader? = null
+    private var input: DataInputStream? = null
     private var socket: Socket? = null
 
     fun listenForIncomingResponse() = flow {
         while (currentCoroutineContext().isActive) {
             try {
-                val message = input?.readLine()
-                val socket=socket?.getInputStream()
-               // UtilsFiles.createLogCat("testing_conn","testing... $message")
-                if (message != null && socket!=null) {
-                    emit(ConnectionResponse.OnResponse(socket))
+                val byte_data = ByteArray(5000)
+                var read = 0
+                if (input != null) {
+                    if (input!!.available() > 0) {
+                        read = input!!.read(byte_data)
+                        emit(ConnectionResponse.OnResponse(byte_data.copyOf(read)))
+                    }
                 }
             } catch (e: IOException) {
-               // UtilsFiles.createLogCat("testing_conn", "Reading Eeception${e.message}")
                 emit(ConnectionResponse.OnResponseError(e))
                 currentCoroutineContext().cancel(CancellationException())
             }
-            delay(100)
         }
     }.flowOn(Dispatchers.IO)
 
@@ -52,7 +54,7 @@ class SocketRepository(
                 output?.flush()
                 null
             } catch (e: Exception) {
-               // UtilsFiles.createLogCat("testing_conn", "Write error ${e.message}")
+                // UtilsFiles.createLogCat("testing_conn", "Write error ${e.message}")
                 ConnectionResponse.OnRequestError("${e.message}")
             }
         } else {
@@ -66,7 +68,7 @@ class SocketRepository(
             try {
                 socket = Socket(ip, port)
                 output = PrintWriter(socket?.getOutputStream()!!)
-                input = BufferedReader(InputStreamReader(socket?.getInputStream()))
+                input = DataInputStream(socket?.getInputStream())
                 ConnectionResponse.OnConnected("Connected")
             } catch (e: IOException) {
                 ConnectionResponse.OnResponseError(e)
@@ -82,7 +84,7 @@ class SocketRepository(
         output?.close()
         input?.close()
         job.cancel("testing completed")
-        return ConnectionResponse.OnDisconnect(400,"Disconnected Manually")
+        return ConnectionResponse.OnDisconnect(400, "Disconnected Manually")
     }
 
 
